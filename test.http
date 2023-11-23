@@ -1,0 +1,4 @@
+# busqueda en general "s" 
+GET http://www.omdbapi.com/?s=war&page=1&apikey=1b67a274
+# busqueda por id "i"
+GET http://www.omdbapi.com/?i=tt2368254&apikey=1b67a274
