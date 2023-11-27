@@ -6,36 +6,22 @@
         <link rel="stylesheet" href="./css/style.css" />
         <script src="./js/main.js"></script>
         <title>Proyecto API</title>
-        <style>
-            .spinner {
-                border: 16px solid #f3f3f3;
-                border-top: 16px solid #3498db;
-                border-radius: 50%;
-                width: 10%;
-                height: 10%;
-                animation: spin 2s linear infinite;
-            }
-
-            @keyframes spin {
-                0% {
-                    transform: rotate(0deg);
-                }
-                100% {
-                    transform: rotate(360deg);
-                }
-            }
-        </style>
     </head>
     <body>
         <header>
-            <input id="miinput" type="text" placeholder="Buscar..." />
             <div id="indicador-busqueda" style="display: none">
                 <div class="spinner"></div>
             </div>
+            <input id="miinput" type="text" placeholder="Buscar..." />
+            <select id="tipo">
+                <option value="movie">Pelicula</option>
+                <option value="series">Serie</option>
+            </select>
+            <button id="btn-informe">Crear informe</button>
         </header>
         <main>
             <section id="container-peliculas"></section>
         </main>
-        <footer></footer>
+        <footer id="footer"></footer>
     </body>
 </html>

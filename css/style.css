@@ -9,23 +9,52 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 7vh;
-    background-color: #f3f3f3;
+    height: 8vh;
+    background-color: #030303;
     position: fixed;
     z-index: 1;
+    margin: auto;
+}
+
+input {
+    width: 20%;
+    height: 2rem;
+    margin-inline: 2%;
+    padding: 0.5rem;
+}
+
+select {
+    padding: 0.5rem;
+}
+
+button {
+    padding: 0.5rem;
+    display: none;
+    margin-inline: 2%;
+    border-radius: 1% solid black;
+}
+
+body {
+    background-color: #f3f3f3;
 }
 
 main {
-    padding-top: 7vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 8.5vh;
+    margin: auto;
+    max-width: 1200px;
 }
 
 img {
-    width: 80%;
-    height: 90%;
+    width: 70%;
+    height: 80%;
 }
 
 #container-peliculas {
     display: flex;
+    gap: 2%;
     align-items: start;
     flex-wrap: wrap;
     justify-content: center;
@@ -33,7 +62,6 @@ img {
 }
 
 .pelicula {
-    border: 1px solid black;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,6 +69,17 @@ img {
     padding: 0.5rem;
     width: 350px;
     height: 450px;
+}
+
+.pelicula:hover {
+    transform: scale(1.1);
+}
+
+.pelicula > h2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
 }
 
 #popup {
@@ -54,13 +93,19 @@ img {
     height: 80%;
     color: white;
     padding: 2%;
+    border-radius: 2%;
 }
 
 #img-pelicula {
-    width: aut;
-    height: 60%;
+    width: auto;
+    height: auto;
     flex: 1 33%;
-    padding: 2%;
+    padding: 1%;
+}
+
+#img-pelicula > img {
+    max-width: 70%;
+    max-height: 75%;
 }
 
 #detalle-pelicula {
@@ -68,8 +113,37 @@ img {
     flex: 1 50%;
     flex-direction: column;
     height: 100%;
+    overflow-y: scroll;
 }
 
 #detalle-pelicula > * {
     margin-block: 2%;
+}
+
+footer {
+    width: 100%;
+    height: 7vh;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    margin-right: 1%;
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 10%;
+    height: 10%;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
