@@ -120,6 +120,18 @@ img {
     margin-block: 2%;
 }
 
+#informe {
+    display: flex;
+    flex: 1 50%;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+#informe > * {
+    margin-block: 0.6%;
+}
+
 footer {
     width: 100%;
     height: 7vh;

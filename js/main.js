@@ -1,7 +1,7 @@
-let listaFinal = [];
 let peticionEnCurso = false;
 let temporizador;
 let pag = 1;
+let peliculasArray = [];
 let popup = document.createElement("article");
 popup.id = "popup";
 
@@ -10,12 +10,9 @@ window.onload = () => {
     let indicadorBusqueda = document.getElementById("indicador-busqueda");
     let selectTipo = document.getElementById("tipo");
     let btn = document.getElementById("btn-informe");
-    btn.addEventListener("click", () => {
-        let aux = [];
-        listaFinal.forEach((e) => {
-            aux.push(e.Title);
-        });
-        console.log(aux);
+    btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        crearInforme();
     });
     document.body.appendChild(popup);
 
@@ -50,8 +47,9 @@ window.onload = () => {
     window.addEventListener("click", (event) => {
         if (event.target == popup) {
             return;
+        } else {
+            popup.style.display = "none";
         }
-        popup.style.display = "none";
     });
 };
 
@@ -90,12 +88,12 @@ function peticion(valor, indicadorBusqueda) {
         let valorSinEspacios = valor.replace(/\s+/g, "+");
         xhttp.open(
             "GET",
-            `http://www.omdbapi.com/?s=${valorSinEspacios}&page=${pag}&type=${tipo}&apikey=1b67a274`,
+            `https://www.omdbapi.com/?s=${valorSinEspacios}&page=${pag}&type=${tipo}&apikey=1b67a274`,
             true,
         );
         xhttp.send();
     } else if (pag === 1) {
-        // Solo borra los resultados si no hay texto en el input
+        // Solo  si no hay texto en el input
         document.getElementById("container-peliculas").innerHTML = "";
         document.getElementById("btn-informe").style.display = "none";
     }
@@ -103,68 +101,120 @@ function peticion(valor, indicadorBusqueda) {
 
 function procesarDatos(datos) {
     let container_peliculas = document.getElementById("container-peliculas");
+
     datos.forEach((dato) => {
-        let section = document.createElement("section");
-        section.className = "pelicula";
-        let h2 = document.createElement("h2");
-        let img = document.createElement("img");
-        h2.innerHTML = dato.Title;
-        if (dato.Poster === "N/A") {
-            img.src = "./img/img-no-disponible.png";
-        } else {
-            img.src = dato.Poster;
-        }
-        section.appendChild(h2);
-        section.appendChild(img);
-        section.addEventListener("click", () => {
-            mostrarDetalles(dato.imdbID);
+        obtenerDetallesPelicula(dato.imdbID, (detallePeliculaSerie) => {
+            peliculasArray.push(detallePeliculaSerie);
+            let section = document.createElement("section");
+            section.className = "pelicula";
+            let h2 = document.createElement("h2");
+            let img = document.createElement("img");
+            h2.innerHTML = detallePeliculaSerie.Title;
+            if (detallePeliculaSerie.Poster === "N/A") {
+                img.src = "./img/img-no-disponible.png";
+            } else {
+                img.src = detallePeliculaSerie.Poster;
+            }
+            section.appendChild(h2);
+            section.appendChild(img);
+            section.addEventListener("click", (e) => {
+                // sin "stopPropagation" no funciona el display flex
+                e.stopPropagation();
+                mostrarDetalles(detallePeliculaSerie);
+            });
+            container_peliculas.appendChild(section);
         });
-        container_peliculas.appendChild(section);
     });
 }
 
-function mostrarDetalles(id) {
+function obtenerDetallesPelicula(id, callback) {
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = () => {
         if (xhttp.readyState === 4 && xhttp.status === 200) {
             let respuesta = JSON.parse(xhttp.responseText);
-            listaFinal = crearInforme(respuesta);
-            if (respuesta.Poster === "N/A") {
-                respuesta.Poster = "./img/img-no-disponible.png";
-            }
-            let valoraciones = "";
-            if (respuesta.Ratings) {
-                for (let valoracion of respuesta.Ratings) {
-                    valoraciones += `<p>${valoracion.Source}: ${valoracion.Value}</p>`;
-                }
-            }
-            popup.innerHTML = `
-                <div id="img-pelicula">
-                    <img src="${respuesta.Poster}" alt="${respuesta.Title}"></div>
-                <div id="detalle-pelicula">
-                    <h2>${respuesta.Title} (${respuesta.Year})</h2>
-                    <p>Director: ${respuesta.Director}</p>
-                    <p>Actores: ${respuesta.Actors}</p>
-                    <p>Tipo: ${respuesta.Type}</p>
-                    <p>Sinopsis: ${respuesta.Plot}</p>
-                    <p>Año: ${respuesta.Year}</p>
-                    <p>Valoraciones:</p>
-                    ${valoraciones}
-                </div>
-                `;
-            popup.style.display = "flex";
-            popup.style.flexWrap = "wrap";
-            popup.style.opacity = 0.9;
+            callback(respuesta);
         }
     };
-    xhttp.open("GET", `http://www.omdbapi.com/?i=${id}&plot=full&apikey=1b67a274`, true);
+    xhttp.open("GET", `https://www.omdbapi.com/?i=${id}&plot=full&apikey=1b67a274`, true);
     xhttp.send();
 }
 
-let peliculasArray = [];
-function crearInforme(datos) {
-    peliculasArray = peliculasArray.concat(datos);
-    let unicaLista = [...new Set(peliculasArray)];
-    unicaLista.sort();
-    return unicaLista;
+function mostrarDetalles(respuesta) {
+    if (respuesta.Poster === "N/A") {
+        respuesta.Poster = "./img/img-no-disponible.png";
+    }
+    let valoraciones = "";
+    if (respuesta.Ratings) {
+        for (let valoracion of respuesta.Ratings) {
+            valoraciones += `<p>${valoracion.Source}: ${valoracion.Value}</p>`;
+        }
+    }
+    popup.innerHTML = `
+        <div id="img-pelicula">
+        <img src="${respuesta.Poster}" alt="${respuesta.Title}"></div>
+        <div id="detalle-pelicula">
+        <h2>${respuesta.Title} (${respuesta.Year})</h2>
+        <p>Director: ${respuesta.Director}</p>
+        <p>Actores: ${respuesta.Actors}</p>
+        <p>Tipo: ${respuesta.Type}</p>
+        <p>Sinopsis: ${respuesta.Plot}</p>
+        <p>Año: ${respuesta.Year}</p>
+        <p>Valoraciones:</p>
+        ${valoraciones}
+        </div>
+`;
+    popup.style.display = "flex";
+    popup.style.flexWrap = "wrap";
+    popup.style.opacity = 0.9;
+}
+
+function obtenerPeliculasMasValoradas(peliculasArray) {
+    return peliculasArray
+        .filter((pelicula) => pelicula.imdbRating && pelicula.imdbRating !== "N/A")
+        .sort((a, b) => b.imdbRating - a.imdbRating)
+        .slice(0, 5);
+}
+
+function obtenerPeliculasMayorRecaudacion(peliculasArray) {
+    return peliculasArray
+        .filter((pelicula) => pelicula.Type === "movie" && pelicula.BoxOffice && pelicula.BoxOffice !== "N/A")
+        .sort((a, b) => b.BoxOffice - a.BoxOffice)
+        .slice(0, 5);
+}
+
+function obtenerPeliculasMasVotadas(peliculasArray) {
+    return peliculasArray
+        .filter((pelicula) => pelicula.imdbVotes && pelicula.imdbVotes !== "N/A")
+        .sort((a, b) => b.imdbVotes - a.imdbVotes)
+        .slice(0, 5);
+}
+
+function crearInforme() {
+    let peliculasPorValoracion = obtenerPeliculasMasValoradas(peliculasArray);
+    let peliculasPorRecaudacion = obtenerPeliculasMayorRecaudacion(peliculasArray);
+    let peliculasPorVotos = obtenerPeliculasMasVotadas(peliculasArray);
+
+    let valoracionesHTML = peliculasPorValoracion
+        .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbRating}</p>`)
+        .join("");
+
+    let votosHTML = peliculasPorVotos.map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbVotes}</p>`).join("");
+
+    let recaudacionesHTML = peliculasPorRecaudacion
+        .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.BoxOffice}</p>`)
+        .join("");
+
+    popup.innerHTML = `
+        <div id="informe">
+            <h2>Más valoradas</h2>
+            ${valoracionesHTML}
+            <h2>Más votadas</h2>
+            ${votosHTML}
+            <h2>Mayor recaudación</h2>
+            ${recaudacionesHTML}
+        </div>
+    `;
+    popup.style.display = "flex";
+    popup.style.flexWrap = "wrap";
+    popup.style.opacity = 0.9;
 }
