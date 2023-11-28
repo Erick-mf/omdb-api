@@ -168,52 +168,89 @@ function mostrarDetalles(respuesta) {
     popup.style.opacity = 0.9;
 }
 
-function obtenerPeliculasMasValoradas(peliculasArray) {
+function obtenerPeliculasMasValoradas(peliculasArray, tipo) {
     return peliculasArray
-        .filter((pelicula) => pelicula.imdbRating && pelicula.imdbRating !== "N/A")
+        .filter((pelicula) => pelicula.Type === tipo && pelicula.imdbRating && pelicula.imdbRating !== "N/A")
         .sort((a, b) => b.imdbRating - a.imdbRating)
         .slice(0, 5);
 }
 
-function obtenerPeliculasMayorRecaudacion(peliculasArray) {
+function obtenerPeliculasMayorRecaudacion(peliculasArray, tipo) {
     return peliculasArray
-        .filter((pelicula) => pelicula.Type === "movie" && pelicula.BoxOffice && pelicula.BoxOffice !== "N/A")
+        .filter((pelicula) => pelicula.Type === tipo && pelicula.BoxOffice && pelicula.BoxOffice !== "N/A")
         .sort((a, b) => b.BoxOffice - a.BoxOffice)
         .slice(0, 5);
 }
 
-function obtenerPeliculasMasVotadas(peliculasArray) {
+function obtenerPeliculasMasVotadas(peliculasArray, tipo) {
     return peliculasArray
-        .filter((pelicula) => pelicula.imdbVotes && pelicula.imdbVotes !== "N/A")
+        .filter((pelicula) => pelicula.Type === tipo && pelicula.imdbVotes && pelicula.imdbVotes !== "N/A")
         .sort((a, b) => b.imdbVotes - a.imdbVotes)
         .slice(0, 5);
 }
 
+function eliminarDuplicados(peliculasArray) {
+    return peliculasArray.filter(
+        (pelicula, index, self) =>
+            index === self.findIndex((p) => p.Title === pelicula.Title && p.Year === pelicula.Year),
+    );
+}
+
 function crearInforme() {
-    let peliculasPorValoracion = obtenerPeliculasMasValoradas(peliculasArray);
-    let peliculasPorRecaudacion = obtenerPeliculasMayorRecaudacion(peliculasArray);
-    let peliculasPorVotos = obtenerPeliculasMasVotadas(peliculasArray);
+    let tipo = document.getElementById("tipo").value;
+    let peliculasUnicas = eliminarDuplicados(peliculasArray);
 
-    let valoracionesHTML = peliculasPorValoracion
-        .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbRating}</p>`)
-        .join("");
+    let informeDiv = document.getElementById("informe");
+    if (!informeDiv) {
+        informeDiv = document.createElement("div");
+        informeDiv.id = "informe";
+    } else {
+        informeDiv.innerHTML = "";
+    }
 
-    let votosHTML = peliculasPorVotos.map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbVotes}</p>`).join("");
+    if (tipo === "movie") {
+        let peliculasPorValoracion = obtenerPeliculasMasValoradas(peliculasUnicas, tipo);
+        let peliculasPorRecaudacion = obtenerPeliculasMayorRecaudacion(peliculasUnicas, tipo);
+        let peliculasPorVotos = obtenerPeliculasMasVotadas(peliculasUnicas, tipo);
 
-    let recaudacionesHTML = peliculasPorRecaudacion
-        .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.BoxOffice}</p>`)
-        .join("");
+        let valoracionesHTML = peliculasPorValoracion
+            .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbRating}</p>`)
+            .join("");
 
-    popup.innerHTML = `
-        <div id="informe">
-            <h2>Más valoradas</h2>
-            ${valoracionesHTML}
-            <h2>Más votadas</h2>
-            ${votosHTML}
-            <h2>Mayor recaudación</h2>
-            ${recaudacionesHTML}
-        </div>
-    `;
+        let votosHTML = peliculasPorVotos.map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbVotes}</p>`).join("");
+
+        let recaudacionesHTML = peliculasPorRecaudacion
+            .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.BoxOffice}</p>`)
+            .join("");
+
+        informeDiv.innerHTML = `
+                <h2>Más valoradas</h2>
+                ${valoracionesHTML}
+                <h2>Más votadas</h2>
+                ${votosHTML}
+                <h2>Mayor recaudación</h2>
+                ${recaudacionesHTML}
+        `;
+    } else if (tipo === "series") {
+        let peliculasPorValoracion = obtenerPeliculasMasValoradas(peliculasUnicas, tipo);
+        let peliculasPorVotos = obtenerPeliculasMasVotadas(peliculasUnicas, tipo);
+
+        let valoracionesHTML = peliculasPorValoracion
+            .map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbRating}</p>`)
+            .join("");
+
+        let votosHTML = peliculasPorVotos.map((pelicula) => `<p>${pelicula.Title}: ${pelicula.imdbVotes}</p>`).join("");
+
+        informeDiv.innerHTML = `
+                <h2>Más valoradas</h2>
+                ${valoracionesHTML}
+                <h2>Más votadas</h2>
+                ${votosHTML}
+        `;
+    }
+
+    popup.innerHTML = "";
+    popup.appendChild(informeDiv);
     popup.style.display = "flex";
     popup.style.flexWrap = "wrap";
     popup.style.opacity = 0.9;
